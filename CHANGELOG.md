@@ -1,5 +1,63 @@
 # Changelog
 
+## v0.3.6, 2014-03-26
+
+### Changes
+
+* Update PHP to 5.5.10
+* Tail CakePHP log files
+* Add `memcache` extension, you can enable it by putting
+  `"ext-memcache": "*"` into your `composer.json` requirements
+* Set UTC as default timezone to prevent PHP notices. This can be
+  changed anytime by your app via `date_default_timezone_set` or by
+  setting `date.timezone` in your `php-config` section in
+  `composer.json`
+
+## v0.3.5, 2014-02-25
+
+### Changes
+
+* Add support for new Heroku API for compile time user config variables.
+  Variables set with `heroku config:set` are now always available at
+  compile time.
+* Add support for Zend Framework 2
+* Enable Freetype support in PHP GD
+* Updated PHP to 5.5.9
+* Frameworks can now define which log files should be additionally
+  "tailed" so they show up in `heroku logs`
+
+## v0.3.4, 2014-01-24
+
+### Changes
+
+* Add `application/x-javascript` to GZIP-able types
+* Add support for the Sundown extension. Add `ext-sundown` to your
+  requirements in your `composer.json` and update your lockfile to enable it.
+
+## v0.3.3, 2014-01-20
+
+### Changes
+
+* Ignore when a prebuilt extension bundle was not found in S3, which
+  fixes Composer requires for `ext-curl` for example.
+
+## v0.3.2, 2014-01-14
+
+### Changes
+
+* Update PHP to 5.5.8
+* Update NGINX to 1.4.4
+
+## v0.3.1, 2014-01-12
+
+### Changes
+
+* Add `apcu` as a separate extension bundle for easy updating
+* Install `apcu` from the separate extension bundle in `compile` to
+  update all existing installations to APCU 4.0.2. This release features
+  the return of the `apc_` functions for a real drop in replacement.
+* Merge PR #72
+
 ## v0.3.0, 2013-12-27
 
 ### Changes
@@ -44,7 +102,7 @@ Imagick, Libevent,…
 ### Changes
 
 * Fix compile command evaluation
-* #28: Fix NGINX error caused by duplicate `root` directives 
+* #28: Fix NGINX error caused by duplicate `root` directives
 
 ## v0.2.0, 2013-09-03
 

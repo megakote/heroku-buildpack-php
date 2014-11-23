@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+php_memcache_version=85a86d8d0ce7c333a88bc378d5aca91dd5f910ff
+
+curl -L "https://github.com/php/pecl-caching-memcache/archive/${php_memcache_version}.tar.gz" \
+    | tar xzv
+
+cd pecl-caching-memcache-${php_memcache_version}
+/app/vendor/php/bin/phpize
+./configure --with-php-config=/app/vendor/php/bin/php-config
+
+make
+cp modules/memcache.so "$EXT_DIR/memcache.so"
+echo "extension=memcache.so" > "$PREFIX/etc/conf.d/memcache.ini"

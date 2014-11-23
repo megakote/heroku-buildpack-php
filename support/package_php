@@ -21,7 +21,7 @@ fi
 
 echo "-----> Packaging PHP $php_version"
 
-tempdir="$( mktemp -t php_xxxx )"
+tempdir="$( mktemp -t php_XXXX )"
 rm -rf $tempdir
 mkdir -p $tempdir
 cd $tempdir
@@ -73,6 +73,7 @@ build_command=$(cat <<BUILD_CMD
     --enable-zip \
     --with-jpeg-dir=/usr \
     --with-png-dir=/usr \
+    --with-freetype-dir=/usr \
     --enable-exif \
     --with-zlib=/app/vendor/php/zlib \
     --with-bz2 \
@@ -93,9 +94,7 @@ build_command=$(cat <<BUILD_CMD
     && make \
     && make install \
     && /app/vendor/php/bin/pear config-set php_dir /app/vendor/php \
-    && $install_zend_optimizer \
-    && yes '' | /app/vendor/php/bin/pecl install apcu-beta \
-    && echo "extension=apcu.so" > /app/vendor/php/etc/conf.d/apcu.ini
+    && $install_zend_optimizer
 BUILD_CMD
 )
 

@@ -6,8 +6,9 @@
 * Supports PHP 5.3, 5.4 and 5.5
 * Uses the memory of the dyno more efficiently by going with NGINX and PHP-FPM.
 * Supports Composer out of the box
-* No writing NGINX configuration files: supports Classic PHP, Silex and Symfony 2 apps with simple configuration driven by your `composer.json`.
-* Zero-Configuration Symfony 2 deployment.
+* No writing NGINX configuration files: supports CakePHP, Classic PHP applications, Magento, Silex, Slim, Symfony 2 and ZF2 apps with simple configuration driven by your `composer.json`.
+* Zero-Configuration Symfony 2 and Yii 1 deployment.
+* Dynamic installing of [supported extensions](support/ext) listed as `ext-` requirments in `composer.json`.
 
 ## How to use it
 
@@ -62,7 +63,7 @@ app's root. And will install node dependencies like less for example.
 ### CakePHP
 
 Is used when the app requires the `pear-pear.cakephp.org/CakePHP` Pear package or when the
-`extra.heroku.framework` key is set to `cakephp2` in the `composer.json`.
+`extra.heroku.framework` key is set to `cakephp2` in the `composer.json`. This project assumes the layout given in the [FriendsOfCake/app-template](https://github.com/FriendsOfCake/app-template) composer project.
 
 Options:
 
@@ -70,26 +71,20 @@ Options:
   is called. All requests which don't match an existing file will be forwarded to
   this document.
 
-### Symfony 2
+### Classic PHP
 
-Is detected when the app requires the `symfony/symfony` package or when the 
-`framework` setting is set to `symfony2` in the `composer.json`.
+The classic PHP configuration is used as fallback when no framework was detected. It serves every `.php` file relative to the document root.
 
-This framework preset doesn't need any configuration to work.
+This is also used when an `index.php` file was found in the root of your
+project and no `composer.json`.
 
-It's recommended to enable the `user-env-compile` Heroku labs feature for better compatibility
-with Symfony's Composer hooks. But please note that if you use config vars in Composer hooks, or in `compile`
-scripts, then a new code push may be necessary if you decide to change a config variable.
+### Magento
 
-You can enable the labs feature for your app with:
-
-```
-$ heroku labs:enable user-env-compile
-```
+Is used when the `extra.heroku.framework` key is set to `magento` in the `composer.json`.
 
 ### Silex
 
-Is used when the app requires the `silex/silex` package or when the 
+Is used when the app requires the `silex/silex` package or when the
 `framework` setting is set to `silex` in the `composer.json`.
 
 Options:
@@ -109,16 +104,53 @@ Options:
   is called. All requests which don't match an existing file will be forwarded to
   this document.
 
-### Magento
+### Symfony 2
 
-Is used when the `extra.heroku.framework` key is set to `magento` in the `composer.json`.
+Is detected when the app requires the `symfony/symfony` package or when the
+`framework` setting is set to `symfony2` in the `composer.json`.
 
-### Classic PHP
+This framework preset doesn't need any configuration to work.
 
-The classic PHP configuration is used as fallback when no framework was detected. It serves every `.php` file relative to the document root.
+Please note that if you use config vars in Composer hooks, or in `compile`
+scripts, then a new code push may be necessary if you decide to change a config variable.
 
-This is also used when an `index.php` file was found in the root of your
-project and no `composer.json`.
+### Yii 1
+
+Is detected when the app requires the `yiisoft/yii` package or when the
+`framework` setting is set to `yii` in the `composer.json`.
+
+This framework preset doesn't need any configuration to work.
+
+Options:
+
+* `index-document`: All requests which don't match an existing file will be forwarded to
+  this document. Defaults to `index.php`. With Yii apps, this can be set to `index-test.php`
+  for deployments used for acceptance testing.
+
+## Extensions
+
+When the buildpack encounters `ext-` requirements in your `composer.json`, it will look
+up the extension name in the [supported extensions](support/ext) and install them.
+
+The version constraint is ignored currently.
+
+For example, to install the Sundown extension:
+
+```
+{
+    "require": {
+        "ext-sundown": "*"
+    }
+}
+```
+
+Note that the extension requirements defined by dependencies are not taken into account there.
+It must be required by the project itself.
+
+##Logging
+
+This buildpack defines default log files by framework.
+It also defines log files nginx and php.
 
 ## Configuration
 
@@ -194,10 +226,10 @@ To launch the app with PHP 5.3.23 and NGINX 1.3.14:
     }
 
 Set the version to "default" to use the current default version. The current
-default versions are NGINX `1.4.2` and PHP `5.5.3`.
+default versions are NGINX `1.4.4` and PHP `5.5.10`.
 
 The version identifiers can also include wildcards, e.g. `5.4.*`. At the
-time of writing, PHP `5.4.19` would be used in this case. This also
+time of writing, PHP `5.4.26` would be used in this case. This also
 works for NGINX.
 
 When a file named `.php-version` exists in the project root, then the
@@ -265,6 +297,20 @@ can also set your license key manually by setting the `NEW_RELIC_LICENSE_KEY` co
 
     "newrelic": true
 
+#### log-files
+
+_Default: []_
+
+The buildpack defines default log files by framework and some log files for php-fpm and nginx.
+Any file put in `log-files` will be be appended to the list.
+A tail on each unique log file will be run at application startup
+
+    "log-files": [
+        "app/logs/rabbit-mq.log",
+        "vendor/nginx/stuff.log"
+    ],
+
+
 ## Node.Js
 
 If your app contains a `package.json` node and its dependencies will be installed
@@ -296,6 +342,18 @@ A minimal `package.json` file with less will look like this :
 
 Node and its modules will be available at compilation meaning you could process nodejs script at that time.
 
+## Authenticating Composer calls on the Github API
+
+Unauthenticated calls to the Github API are subject to a low rate limit. This includes calls to the download endpoint
+which is attempted by default during the Composer call because archives can be cached between deployments.
+
+The buildpack supports using authenticated API calls with Composer:
+
+- Create a personal API token on Github. You can [read more on this](https://github.com/blog/1509-personal-api-tokens).
+  The token should have the minimal permissions needed by your project. If your project only relies on public
+  Github repositories for its dependencies, the best choice is to restrict it to the "public access" permissions.
+- Set your token as the "COMPOSER_GITHUB_TOKEN" config variable in your heroku application. Any new deployment
+  will use it to authenticate the composer calls.
 
 ## Contributing
 
