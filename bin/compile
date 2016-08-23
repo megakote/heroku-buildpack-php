@@ -318,7 +318,7 @@ VENDORED_PHP=/app/vendor/php
 status "Bundling NGINX ${NGINX_VERSION}"
 fetch_engine_package nginx "$NGINX_VERSION" /app/vendor/nginx | indent
 
-status "DOCUMENT_ROOT: ${DOCUMENT_ROOT}; INDEX_DOCUMENT: ${INDEX_DOCUMENT}"
+status "DOCUMENT_ROOT: ${DOCUMENT_ROOT}; WEB_ROOT: ${WEB_ROOT}; INDEX_DOCUMENT: ${INDEX_DOCUMENT}"
 
 status "Bundling PHP ${PHP_VERSION}"
 
@@ -446,6 +446,7 @@ done
 
 export DOCUMENT_ROOT="$DOCUMENT_ROOT"
 export INDEX_DOCUMENT="$INDEX_DOCUMENT"
+export WEB_ROOT="$WEB_ROOT"
 export NGINX_INCLUDES="$NGINX_INCLUDES"
 
 if [ -n "\$NEW_RELIC_LICENSE_KEY" ]; then
