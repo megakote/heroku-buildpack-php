@@ -274,6 +274,7 @@ ADDITIONAL_INSTALLED_LIBS=()
 
 # Read config variables from composer.json if it exists
 if [ -f "$BUILD_DIR/composer.json" ]; then
+    status "Fetch config from composer.json"
     PHP_VERSION=$(package_php_version)
     NGINX_VERSION=$(package_nginx_version)
     DOCUMENT_ROOT=$(package_document_root)
@@ -316,6 +317,8 @@ VENDORED_PHP=/app/vendor/php
 
 status "Bundling NGINX ${NGINX_VERSION}"
 fetch_engine_package nginx "$NGINX_VERSION" /app/vendor/nginx | indent
+
+status "DOCUMENT_ROOT: ${DOCUMENT_ROOT}; INDEX_DOCUMENT: ${INDEX_DOCUMENT}"
 
 status "Bundling PHP ${PHP_VERSION}"
 
